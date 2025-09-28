@@ -73,7 +73,7 @@ $EmailConfig = @{
     CC = @("manager@your-domain.com")  # Optional
     
     # Email subject template
-    Subject = "VMware Snapshot Report - {0}"  # {0} will be replaced with vCenter name
+    Subject = "$VCenterName VMware Snapshot Report - {0}"  # {0} will be replaced with vCenter name
     
     # OPTIONAL: SMTP Authentication (if required)
     # Username = "smtp-user@your-domain.com"
@@ -684,6 +684,6 @@ Prerequisite   : VMware PowerCLI, vCenter access, SMTP server access
 License        : MIT
 
 .LINK
-https://github.com/your-username/VMware-Snapshot-Reporter
+https://github.com/canberkys/VMware-Snapshot-Reporter/
 
 #>
