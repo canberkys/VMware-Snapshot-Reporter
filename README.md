@@ -20,6 +20,9 @@ A comprehensive PowerShell tool for automated VMware snapshot monitoring and rep
 - **🧪 Test Mode**: Validate configuration without sending emails
 - **💾 Backup Reporting**: Automatic file backup when email fails
 
+## 📸 Screenshots
+![VMware Snapshot Report Sample](https://github.com/canberkys/VMware-Snapshot-Reporter/blob/main/mail-example-output.png)
+
 ## 📋 Prerequisites
 
 - **Windows PowerShell 5.1** or later
