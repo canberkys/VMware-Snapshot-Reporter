@@ -1,156 +1,179 @@
 # VMware Snapshot Reporter
 
-Automated VMware snapshot monitoring and reporting tool with color-coded HTML email reports, multi-vCenter support, and risk-based assessment.
+[![CI](https://github.com/canberkys/VMware-Snapshot-Reporter/actions/workflows/ci.yml/badge.svg)](https://github.com/canberkys/VMware-Snapshot-Reporter/actions/workflows/ci.yml)
+[![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue.svg)](https://github.com/PowerShell/PowerShell)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](license.txt)
+
+Automated VMware snapshot monitoring and reporting tool. Connects to one or more vCenter Servers, inventories all VM snapshots, performs risk assessment based on age and size, and delivers color-coded HTML reports with executive summaries.
+
+> **[Live Report Preview](https://canberkys.github.io/VMware-Snapshot-Reporter/)** — See a sample report with mock data.
+
+---
 
 ## Features
 
-- **Risk-Based Color Coding** — Green (<3 days), Yellow (3-7 days), Red (7+ days)
-- **Multi-vCenter Support** — Scan multiple vCenter servers in a single run
-- **Responsive HTML Reports** — Mobile-friendly email reports with executive summaries
-- **Multiple Export Formats** — HTML, CSV, JSON, or All
-- **Secure Credentials** — Encrypted credential files, environment variables, interactive prompt
-- **TestMode** — Generate sample reports without vCenter connectivity
-- **Configurable Thresholds** — Risk and size thresholds via `config.json`
-- **CI/CD Ready** — Pester tests and GitHub Actions pipeline
+| Feature | Description |
+|---------|-------------|
+| **Risk-Based Color Coding** | Green (<3 days), Yellow (3-7 days), Red (7+ days) with configurable thresholds |
+| **Multi-vCenter** | Scan multiple vCenter Servers in a single run, consolidated into one report |
+| **Multiple Exports** | HTML, CSV, JSON, or All — pick the format you need |
+| **Secure Credentials** | 4-tier chain: parameter, encrypted XML, environment variables, interactive prompt |
+| **TestMode** | Generate realistic sample reports without any vCenter connectivity |
+| **Email Delivery** | Opt-in SMTP email with HTML body, CC support, and SSL |
+| **Performance Mode** | `-SkipCreatorLookup` bypasses expensive `Get-VIEvent` queries |
+| **CI/CD Ready** | Pester unit tests + GitHub Actions pipeline with PSScriptAnalyzer |
+
+---
 
 ## Requirements
 
-- PowerShell 5.1 or later (PowerShell 7+ recommended)
-- [VMware PowerCLI](https://developer.vmware.com/powercli) module
-- Read-only access to vCenter Server
-- SMTP server access for email notifications (optional)
+- **PowerShell** 5.1+ (PowerShell 7+ recommended)
+- **[VMware PowerCLI](https://developer.vmware.com/powercli)** module
+- **Read-only** access to vCenter Server
+- SMTP server access *(optional, only for email delivery)*
+
+---
 
 ## Quick Start
 
-### 1. Clone the repository
-
 ```powershell
+# 1. Clone
 git clone https://github.com/canberkys/VMware-Snapshot-Reporter.git
 cd VMware-Snapshot-Reporter
-```
 
-### 2. Install VMware PowerCLI (if not already installed)
-
-```powershell
+# 2. Install PowerCLI (if needed)
 Install-Module VMware.PowerCLI -Scope CurrentUser
-```
 
-### 3. Configure
-
-Copy the example configuration and edit with your values:
-
-```powershell
+# 3. Configure
 Copy-Item config.example.json config.json
 # Edit config.json with your vCenter and SMTP settings
+
+# 4. Run in test mode (no vCenter required)
+.\VMware-Snapshot-Reporter.ps1 -TestMode
 ```
 
-### 4. Run
+### Usage Examples
 
 ```powershell
-# Test mode (no vCenter required)
-.\VMware-Snapshot-Reporter.ps1 -TestMode
-
-# Single vCenter
+# Single vCenter with interactive credential prompt
 .\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa.lab.local
 
-# Multiple vCenters with all export formats
+# Multiple vCenters, all export formats
 .\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa01.lab.local, vcsa02.lab.local -ReportFormat All
 
-# With email delivery
+# Send email report
 .\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa.lab.local -SendEmail
 
-# Skip creator lookup for better performance
+# Fast mode — skip creator lookup
 .\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa.lab.local -SkipCreatorLookup
+
+# Pass credentials directly
+$cred = Get-Credential
+.\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa.lab.local -Credential $cred -SendEmail -ReportFormat All
 ```
+
+---
 
 ## Configuration
 
-### config.json
+Copy `config.example.json` to `config.json` and edit:
 
-| Key | Description | Default |
-|-----|-------------|---------|
-| `vcenterServers` | Array of vCenter FQDNs/IPs | `[]` |
-| `riskThresholds.highRiskDays` | Days threshold for high risk | `7` |
-| `riskThresholds.mediumRiskDays` | Days threshold for medium risk | `3` |
-| `sizeThresholds.largeGB` | GB threshold for large size badge | `50` |
-| `sizeThresholds.mediumGB` | GB threshold for medium size badge | `10` |
-| `email.smtpServer` | SMTP server address | `""` |
-| `email.smtpPort` | SMTP port | `25` |
-| `email.useSSL` | Enable SSL for SMTP | `false` |
-| `email.from` | Sender email address | `""` |
-| `email.to` | Array of recipient emails | `[]` |
-| `email.cc` | Array of CC recipient emails | `[]` |
-| `email.subjectTemplate` | Email subject template (`{0}` = vCenter name) | `"{0} Daily Snapshot Report"` |
-| `poweredOnOnly` | Only scan powered-on VMs | `true` |
-| `maxEventSamples` | Max vCenter events for creator lookup | `1000` |
-| `sortBy` | Sort report by field | `"SizeGB"` |
+```json
+{
+    "vcenterServers": ["vcsa01.lab.local", "vcsa02.lab.local"],
+    "riskThresholds": { "highRiskDays": 7, "mediumRiskDays": 3 },
+    "sizeThresholds": { "largeGB": 50, "mediumGB": 10 },
+    "email": {
+        "smtpServer": "smtp.domain.com",
+        "smtpPort": 25,
+        "useSSL": false,
+        "from": "vmware-reports@domain.com",
+        "to": ["it-team@domain.com"],
+        "cc": [],
+        "subjectTemplate": "{0} Daily Snapshot Report"
+    },
+    "poweredOnOnly": true,
+    "maxEventSamples": 1000,
+    "sortBy": "SizeGB"
+}
+```
+
+> `config.json` is gitignored. Only `config.example.json` is committed.
 
 ### Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `-VCenterServer` | `string[]` | vCenter server(s) to connect to |
-| `-Credential` | `PSCredential` | vCenter credentials |
-| `-ConfigFile` | `string` | Path to config.json |
-| `-OutputPath` | `string` | Report output directory |
+| `-VCenterServer` | `string[]` | Target vCenter server(s). Falls back to `config.json`. |
+| `-Credential` | `PSCredential` | vCenter credentials. Falls back to credential chain. |
+| `-ConfigFile` | `string` | Path to config file. Default: `./config.json` |
+| `-OutputPath` | `string` | Report output directory. Default: `./output` |
 | `-ReportFormat` | `string` | `HTML`, `JSON`, `CSV`, or `All` |
-| `-SendEmail` | `switch` | Send report via email |
-| `-SkipCreatorLookup` | `switch` | Skip Get-VIEvent creator queries |
-| `-TestMode` | `switch` | Use mock data, no vCenter needed |
+| `-SendEmail` | `switch` | Send report via SMTP email |
+| `-SkipCreatorLookup` | `switch` | Skip `Get-VIEvent` queries for faster execution |
+| `-TestMode` | `switch` | Use mock data, no vCenter connection needed |
+
+---
 
 ## Credential Management
 
-Credentials are resolved in this order:
+Credentials are resolved in order:
 
-1. **`-Credential` parameter** — Pass `PSCredential` directly
-2. **Saved credential file** — Encrypted XML at `~/.snapshot-reporter-cred.xml`
-3. **Environment variables** — `VCENTER_USERNAME` and `VCENTER_PASSWORD`
-4. **Interactive prompt** — `Get-Credential` dialog
-
-### Save credentials for automation
+| Priority | Method | Use Case |
+|----------|--------|----------|
+| 1 | `-Credential` parameter | Scripts, automation |
+| 2 | Encrypted XML (`~/.snapshot-reporter-cred.xml`) | Recurring scheduled tasks |
+| 3 | Environment variables (`VCENTER_USERNAME` / `VCENTER_PASSWORD`) | CI/CD pipelines |
+| 4 | Interactive `Get-Credential` prompt | Ad-hoc manual runs |
 
 ```powershell
-# Save credential (encrypted, machine+user bound)
+# Save credentials for scheduled tasks (encrypted, machine+user bound)
 Get-Credential | Export-Clixml -Path ~/.snapshot-reporter-cred.xml
 ```
 
-### Use environment variables (CI/CD)
-
 ```bash
+# CI/CD environment variables
 export VCENTER_USERNAME="svc-snapshot@vsphere.local"
 export VCENTER_PASSWORD="secure-password"
 ```
 
-> **Note:** Encrypted XML credential files are bound to the machine and user that created them (DPAPI on Windows). Use environment variables for CI/CD or cross-machine automation.
+> **Note:** Encrypted XML files use DPAPI on Windows — they are bound to the machine and user that created them. Use environment variables for cross-machine or CI/CD scenarios.
+
+---
 
 ## Project Structure
 
 ```
 VMware-Snapshot-Reporter/
-├── VMware-Snapshot-Reporter.ps1   # Main orchestrator
-├── config.example.json             # Example configuration (copy to config.json)
+├── VMware-Snapshot-Reporter.ps1     # Main orchestrator script
+├── config.example.json               # Configuration template
 ├── checks/
-│   ├── Get-SnapshotCreator.ps1     # Event-based creator lookup
-│   ├── Get-SnapshotInventory.ps1   # Snapshot data collection
-│   └── Invoke-RiskAssessment.ps1   # Risk/size classification
+│   ├── Get-SnapshotCreator.ps1       # Event-based snapshot creator lookup
+│   ├── Get-SnapshotInventory.ps1     # Snapshot data collection from vCenter
+│   └── Invoke-RiskAssessment.ps1     # Risk/size classification engine
 ├── report/
-│   └── New-HtmlReport.ps1          # HTML report + CSV/JSON export
-├── output/                         # Generated reports (gitignored)
+│   └── New-HtmlReport.ps1            # HTML report generation + CSV/JSON export
 ├── tests/
 │   ├── Invoke-RiskAssessment.Tests.ps1
 │   ├── Get-SnapshotInventory.Tests.ps1
 │   └── VMware-Snapshot-Reporter.Tests.ps1
-├── .github/workflows/ci.yml       # GitHub Actions CI pipeline
+├── docs/
+│   └── index.html                     # Live report preview (GitHub Pages)
+├── output/                            # Generated reports (gitignored)
+├── .github/workflows/ci.yml          # CI pipeline (Pester + PSScriptAnalyzer)
 ├── CHANGELOG.md
 └── license.txt
 ```
+
+---
 
 ## Scheduling
 
 ### Windows Task Scheduler
 
 ```powershell
-$action = New-ScheduledTaskAction -Execute "pwsh.exe" -Argument "-File C:\Scripts\VMware-Snapshot-Reporter\VMware-Snapshot-Reporter.ps1 -SendEmail"
+$action  = New-ScheduledTaskAction -Execute "pwsh.exe" `
+    -Argument "-File C:\Scripts\VMware-Snapshot-Reporter\VMware-Snapshot-Reporter.ps1 -SendEmail"
 $trigger = New-ScheduledTaskTrigger -Daily -At "08:00AM"
 Register-ScheduledTask -TaskName "VMware Snapshot Report" -Action $action -Trigger $trigger -RunLevel Highest
 ```
@@ -161,28 +184,32 @@ Register-ScheduledTask -TaskName "VMware Snapshot Report" -Action $action -Trigg
 0 8 * * * /usr/bin/pwsh -File /opt/scripts/VMware-Snapshot-Reporter/VMware-Snapshot-Reporter.ps1 -SendEmail
 ```
 
-## Running Tests
+---
+
+## Testing
 
 ```powershell
-# Install Pester (if needed)
+# Install Pester
 Install-Module Pester -MinimumVersion 5.0 -Force
 
 # Run all tests
 Invoke-Pester ./tests -Output Detailed
 
-# Run specific test file
+# Run specific test
 Invoke-Pester ./tests/Invoke-RiskAssessment.Tests.ps1 -Output Detailed
 ```
 
+---
+
 ## Migration from v2.0
 
-If upgrading from the single-file v2.0 script:
+1. Pull the latest changes or clone fresh
+2. `Copy-Item config.example.json config.json`
+3. Move your vCenter, SMTP, and threshold settings into `config.json`
+4. Remove hardcoded credentials from any old scripts
+5. Add `-SendEmail` flag — email is now opt-in
 
-1. Clone the new repository or pull the latest changes
-2. Copy `config.example.json` to `config.json`
-3. Move your vCenter server, SMTP settings, and thresholds to `config.json`
-4. Remove hardcoded credentials — use one of the secure methods above
-5. Replace `.\VMware-Snapshot-Reporter.ps1` with `.\VMware-Snapshot-Reporter.ps1 -SendEmail`
+---
 
 ## License
 
