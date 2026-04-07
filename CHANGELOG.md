@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.0.1] - 2026-04-08
+
+### Removed
+- `config.json` from repository (user-specific, now gitignored — use `config.example.json` as template)
+- `mail-example-output.png` (outdated v2.0 screenshot, replaced with live HTML preview)
+
+### Added
+- Live report preview via GitHub Pages (`docs/sample-report.html`)
+
+### Fixed
+- `.gitignore` now properly excludes `config.json`
+- README references to removed files cleaned up
+
+---
+
 ## [3.0.0] - 2026-04-08
 
 ### Added

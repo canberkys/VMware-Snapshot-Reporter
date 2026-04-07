@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vcsa-mock.lab.local VMware Snapshot Report</title>
+    <style>
+        @media only screen and (max-width: 768px) {
+            .container { width: 100% !important; margin: 0 !important; }
+            .main-table { font-size: 10px !important; }
+            .main-table th, .main-table td { padding: 4px 2px !important; }
+            .description-cell { max-width: 100px !important; }
+        }
+    </style>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 10px;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
+
+        <!-- Header -->
+        <div style="background-color: #2c3e50; color: white; padding: 25px; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: normal;">VMware Snapshot Report</h1>
+            <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">vcsa-mock.lab.local - 04/08/2026 01:00</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div style="padding: 20px; background-color: #f8f9fa;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 33.33%; padding: 10px; text-align: center;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); border-left: 4px solid #3498db;">
+                            <div style="font-size: 24px; font-weight: bold; color: #2c3e50; margin-bottom: 5px;">8</div>
+                            <div style="color: #7f8c8d; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Active Snapshots</div>
+                        </div>
+                    </td>
+                    <td style="width: 33.33%; padding: 10px; text-align: center;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); border-left: 4px solid #27ae60;">
+                            <div style="font-size: 24px; font-weight: bold; color: #2c3e50; margin-bottom: 5px;">315 GB</div>
+                            <div style="color: #7f8c8d; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Total Size</div>
+                        </div>
+                    </td>
+                    <td style="width: 33.33%; padding: 10px; text-align: center;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); border-left: 4px solid #f39c12;">
+                            <div style="font-size: 24px; font-weight: bold; color: #2c3e50; margin-bottom: 5px;">15 Days</div>
+                            <div style="color: #7f8c8d; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Oldest Snapshot</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Risk Summary -->
+        <div style="padding: 20px; background-color: #fff;">
+            <h3 style="margin: 0 0 15px 0; color: #2c3e50;">Risk Summary</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 33.33%; padding: 5px; text-align: center;">
+                        <span style="background-color: #d1fae5; color: #16a34a; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 12px;">
+                            Low Risk (&lt;3 days): 2
+                        </span>
+                    </td>
+                    <td style="width: 33.33%; padding: 5px; text-align: center;">
+                        <span style="background-color: #fef3c7; color: #d97706; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 12px;">
+                            Medium Risk (3-6 days): 3
+                        </span>
+                    </td>
+                    <td style="width: 33.33%; padding: 5px; text-align: center;">
+                        <span style="background-color: #fee2e2; color: #dc2626; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 12px;">
+                            High Risk (7+ days): 3
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Table Header -->
+        <div style="background-color: #34495e; color: white; padding: 15px 20px;">
+            <h2 style="margin: 0; font-size: 18px; font-weight: normal;">Detailed Snapshot List</h2>
+        </div>
+
+        <!-- Responsive Table -->
+        <div style="padding: 20px; overflow-x: auto;">
+            <table class="main-table" style="width: 100%; border-collapse: collapse; background: white; margin: 0; font-size: 13px; table-layout: fixed;">
+                <thead>
+                    <tr style="background-color: #495057;">
+                        <th style="color: white; padding: 12px 8px; text-align: left; font-weight: normal; font-size: 12px; border: none; width: 12%;">VM Name</th>
+                        <th style="color: white; padding: 12px 8px; text-align: left; font-weight: normal; font-size: 12px; border: none; width: 12%;">Snapshot Name</th>
+                        <th style="color: white; padding: 12px 8px; text-align: left; font-weight: normal; font-size: 12px; border: none; width: 11%;">Created</th>
+                        <th style="color: white; padding: 12px 8px; text-align: center; font-weight: normal; font-size: 12px; border: none; width: 9%;">Duration</th>
+                        <th style="color: white; padding: 12px 8px; text-align: left; font-weight: normal; font-size: 12px; border: none; width: 28%;">Description</th>
+                        <th style="color: white; padding: 12px 8px; text-align: center; font-weight: normal; font-size: 12px; border: none; width: 8%;">Size (GB)</th>
+                        <th style="color: white; padding: 12px 8px; text-align: left; font-weight: normal; font-size: 12px; border: none; width: 10%;">Created By</th>
+                        <th style="color: white; padding: 12px 8px; text-align: left; font-weight: normal; font-size: 12px; border: none; width: 10%;">vCenter</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Row 1: High Risk, Large Size -->
+                    <tr style="background-color: #fef2f2; border-left: 4px solid #ef4444;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: bold; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">PROD-SQL-01</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">DB Migration</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px;">04/06/2026<br><small style="color: #666;">14:30</small></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">2 days</span></td>
+                        <td class="description-cell" style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word; max-width: 300px;">Before database schema migration</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #ffebee; color: #d32f2f; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">120</span></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">dba</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">vcsa-mock.lab.local</td>
+                    </tr>
+                    <!-- Row 2: High Risk, Large Size -->
+                    <tr style="background-color: #fef2f2; border-left: 4px solid #ef4444;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: bold; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">PROD-DB-01</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">Before Patching</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px;">03/24/2026<br><small style="color: #666;">09:15</small></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">15 days</span></td>
+                        <td class="description-cell" style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word; max-width: 300px;">Pre-patch snapshot before Windows updates</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #ffebee; color: #d32f2f; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">85</span></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">admin</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">vcsa-mock.lab.local</td>
+                    </tr>
+                    <!-- Row 3: High Risk, Medium Size -->
+                    <tr style="background-color: #fef2f2; border-left: 4px solid #ef4444;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: bold; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">PROD-APP-02</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">Upgrade Backup</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px;">03/29/2026<br><small style="color: #666;">11:45</small></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">10 days</span></td>
+                        <td class="description-cell" style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word; max-width: 300px;">Application upgrade rollback point</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fff3e0; color: #f57c00; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">42</span></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">svc-backup</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">vcsa-mock.lab.local</td>
+                    </tr>
+                    <!-- Row 4: Medium Risk, Medium Size -->
+                    <tr style="background-color: #fffbeb; border-left: 4px solid #f59e0b;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: bold; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">DEV-TEST-03</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">Dev Snapshot</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px;">04/03/2026<br><small style="color: #666;">16:20</small></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">5 days</span></td>
+                        <td class="description-cell" style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word; max-width: 300px;">Development testing checkpoint</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fff3e0; color: #f57c00; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">28</span></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">dev.team</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">vcsa-mock.lab.local</td>
+                    </tr>
+                    <!-- Row 5: Medium Risk, Medium Size -->
+                    <tr style="background-color: #fffbeb; border-left: 4px solid #f59e0b;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: bold; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">STAGING-01</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">Pre-Deploy</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px;">04/04/2026<br><small style="color: #666;">08:30</small></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">4 days</span></td>
+                        <td class="description-cell" style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word; max-width: 300px;">Before staging deployment v2.5.1</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fff3e0; color: #f57c00; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">18</span></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">deploy-svc</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">vcsa-mock.lab.local</td>
+                    </tr>
+                    <!-- Row 6: Medium Risk, Medium Size -->
+                    <tr style="background-color: #fffbeb; border-left: 4px solid #f59e0b;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: bold; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">PROD-WEB-01</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">Config Change</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px;">03/31/2026<br><small style="color: #666;">13:00</small></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">8 days</span></td>
+                        <td class="description-cell" style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word; max-width: 300px;">Before IIS configuration changes</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #fff3e0; color: #f57c00; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">12</span></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">john.doe</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">vcsa-mock.lab.local</td>
+                    </tr>
+                    <!-- Row 7: Low Risk, Normal Size -->
+                    <tr style="background-color: #f0fdf4; border-left: 4px solid #22c55e;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: bold; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">PROD-DC-01</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">AD Changes</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px;">04/07/2026<br><small style="color: #666;">10:00</small></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #dcfce7; color: #16a34a; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">1 days</span></td>
+                        <td class="description-cell" style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word; max-width: 300px;">Before Active Directory Group Policy update</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">5</span></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">ad.admin</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">vcsa-mock.lab.local</td>
+                    </tr>
+                    <!-- Row 8: Low Risk, Normal Size -->
+                    <tr style="background-color: #f8f9fa; border-left: 4px solid #22c55e;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-weight: bold; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">DEV-BUILD-02</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word;">Clean State</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px;">04/08/2026<br><small style="color: #666;">01:00</small></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #dcfce7; color: #16a34a; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">0 days</span></td>
+                        <td class="description-cell" style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word; max-width: 300px;">Clean build environment snapshot</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; text-align: center;"><span style="background-color: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-block; white-space: nowrap;">3</span></td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">Unknown</td>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e9ecef; font-size: 11px; word-wrap: break-word; overflow-wrap: break-word;">vcsa-mock.lab.local</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 15px 20px; text-align: center; color: #6c757d; border-top: 1px solid #e9ecef;">
+            <p style="margin: 0; font-size: 13px;">This report was generated automatically - 04/08/2026 01:00:00</p>
+            <p style="margin: 5px 0 0 0; font-size: 11px;">
+                <a href="https://github.com/canberkys/VMware-Snapshot-Reporter" target="_blank" style="color: #3498db; text-decoration: none;">VMware Snapshot Reporter v3.0</a> |
+                Canberkys
+            </p>
+            <p style="margin: 8px 0 0 0; font-size: 12px;">
+                <span style="display: inline-block; width: 10px; height: 10px; background-color: #22c55e; border-radius: 2px; margin-right: 5px; vertical-align: middle;"></span>&lt;3 Days (Low Risk)
+                <span style="display: inline-block; width: 10px; height: 10px; background-color: #f59e0b; border-radius: 2px; margin: 0 5px 0 15px; vertical-align: middle;"></span>3-6 Days (Medium Risk)
+                <span style="display: inline-block; width: 10px; height: 10px; background-color: #ef4444; border-radius: 2px; margin: 0 5px 0 15px; vertical-align: middle;"></span>7+ Days (High Risk)
+            </p>
+        </div>
+    </div>
+</body>
+</html>
