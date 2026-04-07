@@ -1,309 +1,196 @@
 # VMware Snapshot Reporter
 
-A comprehensive PowerShell tool for automated VMware snapshot monitoring and reporting with color-coded HTML email notifications.
+Automated VMware snapshot monitoring and reporting tool with color-coded HTML email reports, multi-vCenter support, and risk-based assessment.
 
-![VMware Snapshot Reporter](https://img.shields.io/badge/PowerShell-5.1%2B-blue)
-![VMware PowerCLI](https://img.shields.io/badge/VMware-PowerCLI-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![Sample Report](mail-example-output.png)
 
-## 🚀 Features
+## Features
 
-- **📊 Comprehensive Reporting**: Detailed snapshot analysis with statistics and summaries
-- **🎨 Color-Coded Risk Assessment**: 
-  - 🟢 Green: Low risk (< 2 days old)
-  - 🟡 Yellow: Medium risk (2-3 days old)  
-  - 🔴 Red: High risk (3+ days old)
-- **📧 HTML Email Reports**: Beautiful, responsive email notifications
-- **⚙️ Configurable Thresholds**: Customize risk assessment criteria
-- **📱 Mobile-Friendly**: Responsive design for all devices
-- **🔒 Secure**: Support for credential files and encrypted passwords
-- **🧪 Test Mode**: Validate configuration without sending emails
-- **💾 Backup Reporting**: Automatic file backup when email fails
+- **Risk-Based Color Coding** — Green (<3 days), Yellow (3-7 days), Red (7+ days)
+- **Multi-vCenter Support** — Scan multiple vCenter servers in a single run
+- **Responsive HTML Reports** — Mobile-friendly email reports with executive summaries
+- **Multiple Export Formats** — HTML, CSV, JSON, or All
+- **Secure Credentials** — Encrypted credential files, environment variables, interactive prompt
+- **TestMode** — Generate sample reports without vCenter connectivity
+- **Configurable Thresholds** — Risk and size thresholds via `config.json`
+- **CI/CD Ready** — Pester tests and GitHub Actions pipeline
 
-## 📸 Screenshots
-![VMware Snapshot Report Sample](https://github.com/canberkys/VMware-Snapshot-Reporter/blob/main/mail-example-output.png)
+## Requirements
 
-## 📋 Prerequisites
+- PowerShell 5.1 or later (PowerShell 7+ recommended)
+- [VMware PowerCLI](https://developer.vmware.com/powercli) module
+- Read-only access to vCenter Server
+- SMTP server access for email notifications (optional)
 
-- **Windows PowerShell 5.1** or later
-- **VMware PowerCLI** module
-- **vCenter Server** access (read-only minimum)
-- **SMTP Server** access for email notifications
+## Quick Start
 
-## 🔧 Installation
+### 1. Clone the repository
 
-1. **Install VMware PowerCLI** (if not already installed):
-   ```powershell
-   Install-Module -Name VMware.PowerCLI -Force -AllowClobber
-   ```
-
-2. **Download the script**:
-   ```bash
-   git clone https://github.com/canberkys/VMware-Snapshot-Reporter/git
-   cd VMware-Snapshot-Reporter
-   ```
-
-3. **Configure the script** (see Configuration section below)
-
-## ⚙️ Configuration
-
-Before running the script, update the configuration section at the top of `VMware-Snapshot-Reporter.ps1`:
-
-### vCenter Configuration
 ```powershell
-$VCenterConfig = @{
-    Server = "your-vcenter-server.domain.com"  # REQUIRED: Your vCenter FQDN/IP
-    Username = "your-service-account@domain.com"  # REQUIRED: Service account
-    Password = "your-secure-password"  # REQUIRED: Account password
-    # CredentialPath = "C:\Secure\vcenter-creds.xml"  # OPTIONAL: Credential file
-}
+git clone https://github.com/canberkys/VMware-Snapshot-Reporter.git
+cd VMware-Snapshot-Reporter
 ```
 
-### Email Configuration
+### 2. Install VMware PowerCLI (if not already installed)
+
 ```powershell
-$EmailConfig = @{
-    SmtpServer = "your-smtp-server.domain.com"  # REQUIRED: SMTP server
-    SmtpPort = 25  # OPTIONAL: SMTP port (25, 587, 465)
-    From = "vmware-reports@your-domain.com"  # REQUIRED: Sender email
-    To = @("it-team@your-domain.com")  # REQUIRED: Recipient emails
-    CC = @("manager@your-domain.com")  # OPTIONAL: CC recipients
-    Subject = "VMware Snapshot Report - {0}"  # Email subject template
-}
+Install-Module VMware.PowerCLI -Scope CurrentUser
 ```
 
-### Risk Thresholds
+### 3. Configure
+
+Copy the example configuration and edit with your values:
+
 ```powershell
-$RiskConfig = @{
-    HighRiskDays = 3    # Snapshots older than 3 days = Red
-    MediumRiskDays = 2  # Snapshots 2-3 days old = Yellow
-    # Snapshots < 2 days = Green
-}
+Copy-Item config.example.json config.json
+# Edit config.json with your vCenter and SMTP settings
 ```
 
-## 🔐 Security Best Practices
+### 4. Run
 
-### Option 1: Credential Files (Recommended)
 ```powershell
-# Create encrypted credential file
-Get-Credential | Export-CliXml -Path "C:\Secure\vcenter-creds.xml"
-
-# Update configuration to use credential file
-$VCenterConfig = @{
-    Server = "your-vcenter-server.domain.com"
-    CredentialPath = "C:\Secure\vcenter-creds.xml"
-}
-```
-
-### Option 2: Environment Variables
-```powershell
-# Set environment variables
-$env:VCENTER_USERNAME = "service-account@domain.com"
-$env:VCENTER_PASSWORD = "secure-password"
-
-# Update configuration
-$VCenterConfig = @{
-    Server = "your-vcenter-server.domain.com"
-    Username = $env:VCENTER_USERNAME
-    Password = $env:VCENTER_PASSWORD
-}
-```
-
-## 🚀 Usage
-
-### Basic Usage
-```powershell
-.\VMware-Snapshot-Reporter.ps1
-```
-
-### Test Mode (No Emails Sent)
-```powershell
+# Test mode (no vCenter required)
 .\VMware-Snapshot-Reporter.ps1 -TestMode
+
+# Single vCenter
+.\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa.lab.local
+
+# Multiple vCenters with all export formats
+.\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa01.lab.local, vcsa02.lab.local -ReportFormat All
+
+# With email delivery
+.\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa.lab.local -SendEmail
+
+# Skip creator lookup for better performance
+.\VMware-Snapshot-Reporter.ps1 -VCenterServer vcsa.lab.local -SkipCreatorLookup
 ```
 
-### Save Report to File
+## Configuration
+
+### config.json
+
+| Key | Description | Default |
+|-----|-------------|---------|
+| `vcenterServers` | Array of vCenter FQDNs/IPs | `[]` |
+| `riskThresholds.highRiskDays` | Days threshold for high risk | `7` |
+| `riskThresholds.mediumRiskDays` | Days threshold for medium risk | `3` |
+| `sizeThresholds.largeGB` | GB threshold for large size badge | `50` |
+| `sizeThresholds.mediumGB` | GB threshold for medium size badge | `10` |
+| `email.smtpServer` | SMTP server address | `""` |
+| `email.smtpPort` | SMTP port | `25` |
+| `email.useSSL` | Enable SSL for SMTP | `false` |
+| `email.from` | Sender email address | `""` |
+| `email.to` | Array of recipient emails | `[]` |
+| `email.cc` | Array of CC recipient emails | `[]` |
+| `email.subjectTemplate` | Email subject template (`{0}` = vCenter name) | `"{0} Daily Snapshot Report"` |
+| `poweredOnOnly` | Only scan powered-on VMs | `true` |
+| `maxEventSamples` | Max vCenter events for creator lookup | `1000` |
+| `sortBy` | Sort report by field | `"SizeGB"` |
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `-VCenterServer` | `string[]` | vCenter server(s) to connect to |
+| `-Credential` | `PSCredential` | vCenter credentials |
+| `-ConfigFile` | `string` | Path to config.json |
+| `-OutputPath` | `string` | Report output directory |
+| `-ReportFormat` | `string` | `HTML`, `JSON`, `CSV`, or `All` |
+| `-SendEmail` | `switch` | Send report via email |
+| `-SkipCreatorLookup` | `switch` | Skip Get-VIEvent creator queries |
+| `-TestMode` | `switch` | Use mock data, no vCenter needed |
+
+## Credential Management
+
+Credentials are resolved in this order:
+
+1. **`-Credential` parameter** — Pass `PSCredential` directly
+2. **Saved credential file** — Encrypted XML at `~/.snapshot-reporter-cred.xml`
+3. **Environment variables** — `VCENTER_USERNAME` and `VCENTER_PASSWORD`
+4. **Interactive prompt** — `Get-Credential` dialog
+
+### Save credentials for automation
+
 ```powershell
-.\VMware-Snapshot-Reporter.ps1 -SaveToFile -OutputPath "C:\Reports\snapshot-report.html"
+# Save credential (encrypted, machine+user bound)
+Get-Credential | Export-Clixml -Path ~/.snapshot-reporter-cred.xml
 ```
 
-### Using External Configuration File
-```powershell
-.\VMware-Snapshot-Reporter.ps1 -ConfigFile "C:\Config\production-config.ps1"
-```
+### Use environment variables (CI/CD)
 
-### Combined Options
-```powershell
-.\VMware-Snapshot-Reporter.ps1 -TestMode -SaveToFile -OutputPath "C:\Reports\test-report.html"
-```
-
-## 📊 Sample Output
-
-### Console Output
-```
-[2025-09-28 10:30:15] [INFO] VMware Snapshot Reporter v2.0 starting...
-[2025-09-28 10:30:15] [INFO] vCenter: vcenter.company.com
-[2025-09-28 10:30:16] [SUCCESS] Successfully connected to vCenter: vcenter.company.com
-[2025-09-28 10:30:18] [SUCCESS] Successfully processed 5 snapshots
-[2025-09-28 10:30:18] [SUCCESS] === SNAPSHOT REPORT SUMMARY ===
-[2025-09-28 10:30:18] [SUCCESS] Total Snapshots: 5
-[2025-09-28 10:30:18] [SUCCESS] Total Size: 125.6 GB
-[2025-09-28 10:30:18] [SUCCESS] Risk Distribution: High=1, Medium=2, Low=2
-[2025-09-28 10:30:19] [SUCCESS] Email report sent successfully
-```
-
-### Email Report Features
-- **Executive Summary**: Total snapshots, size, and oldest snapshot age
-- **Risk Assessment**: Color-coded breakdown of snapshot ages
-- **Detailed Table**: Complete snapshot inventory with:
-  - VM Name
-  - Snapshot Name  
-  - Creation Date
-  - Age in Days (color-coded)
-  - Description
-  - Size (color-coded)
-  - Creator Username
-
-## 📅 Automation
-
-### Task Scheduler (Windows)
-Create a scheduled task to run daily:
-
-```powershell
-# Create scheduled task
-$Action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-File C:\Scripts\VMware-Snapshot-Reporter.ps1"
-$Trigger = New-ScheduledTaskTrigger -Daily -At "09:00AM"
-$Settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Hours 1)
-$Principal = New-ScheduledTaskPrincipal -UserId "DOMAIN\ServiceAccount" -LogonType ServiceAccount
-
-Register-ScheduledTask -TaskName "VMware Snapshot Report" -Action $Action -Trigger $Trigger -Settings $Settings -Principal $Principal
-```
-
-### Cron Job (Linux with PowerShell Core)
 ```bash
-# Add to crontab (run daily at 9 AM)
-0 9 * * * /usr/bin/pwsh -File /opt/scripts/VMware-Snapshot-Reporter.ps1
+export VCENTER_USERNAME="svc-snapshot@vsphere.local"
+export VCENTER_PASSWORD="secure-password"
 ```
 
-## 🛠️ Troubleshooting
+> **Note:** Encrypted XML credential files are bound to the machine and user that created them (DPAPI on Windows). Use environment variables for CI/CD or cross-machine automation.
 
-### Common Issues
+## Project Structure
 
-#### PowerCLI Module Not Found
+```
+VMware-Snapshot-Reporter/
+├── VMware-Snapshot-Reporter.ps1   # Main orchestrator
+├── config.json                     # Configuration (gitignored values)
+├── config.example.json             # Example configuration
+├── checks/
+│   ├── Get-SnapshotCreator.ps1     # Event-based creator lookup
+│   ├── Get-SnapshotInventory.ps1   # Snapshot data collection
+│   └── Invoke-RiskAssessment.ps1   # Risk/size classification
+├── report/
+│   └── New-HtmlReport.ps1          # HTML report + CSV/JSON export
+├── output/                         # Generated reports (gitignored)
+├── tests/
+│   ├── Invoke-RiskAssessment.Tests.ps1
+│   ├── Get-SnapshotInventory.Tests.ps1
+│   └── VMware-Snapshot-Reporter.Tests.ps1
+├── .github/workflows/ci.yml       # GitHub Actions CI pipeline
+├── CHANGELOG.md
+└── license.txt
+```
+
+## Scheduling
+
+### Windows Task Scheduler
+
 ```powershell
-Install-Module -Name VMware.PowerCLI -Force -AllowClobber -Scope CurrentUser
+$action = New-ScheduledTaskAction -Execute "pwsh.exe" -Argument "-File C:\Scripts\VMware-Snapshot-Reporter\VMware-Snapshot-Reporter.ps1 -SendEmail"
+$trigger = New-ScheduledTaskTrigger -Daily -At "08:00AM"
+Register-ScheduledTask -TaskName "VMware Snapshot Report" -Action $action -Trigger $trigger -RunLevel Highest
 ```
 
-#### Certificate Errors
-The script automatically ignores invalid certificates, but you can also:
+### Linux Cron
+
+```bash
+0 8 * * * /usr/bin/pwsh -File /opt/scripts/VMware-Snapshot-Reporter/VMware-Snapshot-Reporter.ps1 -SendEmail
+```
+
+## Running Tests
+
 ```powershell
-Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+# Install Pester (if needed)
+Install-Module Pester -MinimumVersion 5.0 -Force
+
+# Run all tests
+Invoke-Pester ./tests -Output Detailed
+
+# Run specific test file
+Invoke-Pester ./tests/Invoke-RiskAssessment.Tests.ps1 -Output Detailed
 ```
 
-#### SMTP Authentication Required
-Update email configuration:
-```powershell
-$EmailConfig = @{
-    SmtpServer = "smtp.office365.com"
-    SmtpPort = 587
-    UseSSL = $true
-    Username = "smtp-user@domain.com"
-    Password = "app-password"
-    # ... other settings
-}
-```
+## Migration from v2.0
 
-#### Firewall/Network Issues
-Test connectivity:
-```powershell
-Test-NetConnection your-vcenter-server.domain.com -Port 443
-Test-NetConnection your-smtp-server.domain.com -Port 25
-```
+If upgrading from the single-file v2.0 script:
 
-### Debug Mode
-Add verbose logging:
-```powershell
-$VerbosePreference = "Continue"
-.\VMware-Snapshot-Reporter.ps1 -Verbose
-```
+1. Clone the new repository or pull the latest changes
+2. Copy `config.example.json` to `config.json`
+3. Move your vCenter server, SMTP settings, and thresholds to `config.json`
+4. Remove hardcoded credentials — use one of the secure methods above
+5. Replace `.\VMware-Snapshot-Reporter.ps1` with `.\VMware-Snapshot-Reporter.ps1 -SendEmail`
 
-## 🔧 Customization
+## License
 
-### Custom Risk Thresholds
-```powershell
-$RiskConfig = @{
-    HighRiskDays = 7     # Weekly cleanup cycle
-    MediumRiskDays = 3   # 3-day warning period
-}
-```
+[MIT](license.txt)
 
-### Additional Email Recipients
-```powershell
-$EmailConfig = @{
-    To = @(
-        "primary-admin@company.com",
-        "backup-admin@company.com",
-        "infrastructure-team@company.com"
-    )
-    CC = @(
-        "manager@company.com",
-        "director@company.com"
-    )
-}
-```
+## Author
 
-### Custom Report Filters
-```powershell
-$ReportConfig = @{
-    PoweredOnOnly = $false      # Include powered-off VMs
-    MaxEventSamples = 2000      # Increase event history
-    SortBySize = $false         # Sort by age instead of size
-}
-```
-
-## 📈 Performance Considerations
-
-- **Large Environments**: Increase `MaxEventSamples` carefully as it affects performance
-- **Network Latency**: Consider running the script from a server close to vCenter
-- **Concurrent Access**: Multiple scripts can run simultaneously against different vCenters
-- **Memory Usage**: Large environments may require PowerShell memory optimization
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/new-feature`)
-5. Create a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Issues**: [GitHub Issues](https://github.com/canberkys/VMware-Snapshot-Reporter/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/canberkys/VMware-Snapshot-Reporter/discussions)
-- **Wiki**: [Project Wiki](https://github.com/canberkys/VMware-Snapshot-Reporter/wiki)
-
-## 🙏 Acknowledgments
-
-- VMware PowerCLI team for the excellent PowerShell module
-- Community contributors for feedback and improvements
-- IT Operations teams worldwide using this tool
-
-## 📊 Statistics
-
-- **Language**: PowerShell
-- **Lines of Code**: ~500
-- **File Size**: ~25KB
-- **Tested On**: 
-  - vCenter 6.7, 7.0, 8.0
-  - PowerShell 5.1, 7.x
-  - Exchange Server, Office 365, Gmail SMTP
-
----
-
-⭐ **Star this repository if you find it useful!**
-
-🐛 **Found a bug?** [Report it here](https://github.com/canberkys/VMware-Snapshot-Reporter/issues)
-
-💡 **Have an idea?** [Share it with us](https://github.com/canberkys/VMware-Snapshot-Reporter/discussions)
+**Canberk Kilicarslan** — [GitHub](https://github.com/canberkys)

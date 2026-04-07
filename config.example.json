@@ -1,0 +1,23 @@
+{
+    "vcenterServers": ["vcsa.lab.local"],
+    "riskThresholds": {
+        "highRiskDays": 7,
+        "mediumRiskDays": 3
+    },
+    "sizeThresholds": {
+        "largeGB": 50,
+        "mediumGB": 10
+    },
+    "email": {
+        "smtpServer": "smtp.domain.com",
+        "smtpPort": 25,
+        "useSSL": false,
+        "from": "vmware-reports@domain.com",
+        "to": ["it-team@domain.com"],
+        "cc": [],
+        "subjectTemplate": "{0} Daily Snapshot Report"
+    },
+    "poweredOnOnly": true,
+    "maxEventSamples": 1000,
+    "sortBy": "SizeGB"
+}

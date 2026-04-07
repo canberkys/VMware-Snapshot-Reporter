@@ -1,0 +1,23 @@
+{
+    "vcenterServers": [],
+    "riskThresholds": {
+        "highRiskDays": 7,
+        "mediumRiskDays": 3
+    },
+    "sizeThresholds": {
+        "largeGB": 50,
+        "mediumGB": 10
+    },
+    "email": {
+        "smtpServer": "",
+        "smtpPort": 25,
+        "useSSL": false,
+        "from": "",
+        "to": [],
+        "cc": [],
+        "subjectTemplate": "{0} Daily Snapshot Report"
+    },
+    "poweredOnOnly": true,
+    "maxEventSamples": 1000,
+    "sortBy": "SizeGB"
+}

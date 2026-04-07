@@ -1,0 +1,19 @@
+# Output reports
+output/*.html
+output/*.json
+output/*.csv
+output/*.log
+
+# Credential files
+*.cred.xml
+*-cred.xml
+
+# PowerShell
+*.ps1xml
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
