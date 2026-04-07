@@ -2,8 +2,6 @@
 
 Automated VMware snapshot monitoring and reporting tool with color-coded HTML email reports, multi-vCenter support, and risk-based assessment.
 
-![Sample Report](mail-example-output.png)
-
 ## Features
 
 - **Risk-Based Color Coding** — Green (<3 days), Yellow (3-7 days), Red (7+ days)
@@ -130,8 +128,7 @@ export VCENTER_PASSWORD="secure-password"
 ```
 VMware-Snapshot-Reporter/
 ├── VMware-Snapshot-Reporter.ps1   # Main orchestrator
-├── config.json                     # Configuration (gitignored values)
-├── config.example.json             # Example configuration
+├── config.example.json             # Example configuration (copy to config.json)
 ├── checks/
 │   ├── Get-SnapshotCreator.ps1     # Event-based creator lookup
 │   ├── Get-SnapshotInventory.ps1   # Snapshot data collection
