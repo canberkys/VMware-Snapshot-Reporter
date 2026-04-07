@@ -1,8 +1,5 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot ".." "checks" "Invoke-RiskAssessment.ps1")
-}
-
-Describe "Invoke-RiskAssessment" {
 
     function New-TestSnapshot {
         param([int]$Duration, [int]$SizeGB, [string]$VM = "TEST-VM")
@@ -17,21 +14,24 @@ Describe "Invoke-RiskAssessment" {
             VCenter     = "vcsa-test"
         }
     }
+}
+
+Describe "Invoke-RiskAssessment" {
 
     Context "Risk Classification" {
-        It "Classifies snapshot older than <HighRiskDays> days as High risk" {
+        It "Classifies snapshot older than 7 days as High risk" {
             $snap = New-TestSnapshot -Duration 10 -SizeGB 5
             $result = Invoke-RiskAssessment -Snapshots @($snap)
             $result.Snapshots[0].RiskLevel | Should -Be "High"
         }
 
-        It "Classifies snapshot between <MediumRiskDays> and <HighRiskDays> as Medium risk" {
+        It "Classifies snapshot between 3 and 7 days as Medium risk" {
             $snap = New-TestSnapshot -Duration 5 -SizeGB 5
             $result = Invoke-RiskAssessment -Snapshots @($snap)
             $result.Snapshots[0].RiskLevel | Should -Be "Medium"
         }
 
-        It "Classifies snapshot younger than <MediumRiskDays> days as Low risk" {
+        It "Classifies snapshot younger than 3 days as Low risk" {
             $snap = New-TestSnapshot -Duration 1 -SizeGB 5
             $result = Invoke-RiskAssessment -Snapshots @($snap)
             $result.Snapshots[0].RiskLevel | Should -Be "Low"
@@ -43,13 +43,13 @@ Describe "Invoke-RiskAssessment" {
             $result.Snapshots[0].RiskLevel | Should -Be "Low"
         }
 
-        It "Classifies exactly <HighRiskDays> boundary as High risk" {
+        It "Classifies exactly 7-day boundary as High risk" {
             $snap = New-TestSnapshot -Duration 7 -SizeGB 5
             $result = Invoke-RiskAssessment -Snapshots @($snap)
             $result.Snapshots[0].RiskLevel | Should -Be "High"
         }
 
-        It "Classifies exactly <MediumRiskDays> boundary as Medium risk" {
+        It "Classifies exactly 3-day boundary as Medium risk" {
             $snap = New-TestSnapshot -Duration 3 -SizeGB 5
             $result = Invoke-RiskAssessment -Snapshots @($snap)
             $result.Snapshots[0].RiskLevel | Should -Be "Medium"
