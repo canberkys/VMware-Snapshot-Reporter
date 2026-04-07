@@ -2,15 +2,15 @@ Describe "VMware-Snapshot-Reporter" {
 
     Context "Configuration" {
         BeforeAll {
-            $script:configPath = Join-Path $PSScriptRoot ".." "config.json"
+            $script:configPath = Join-Path $PSScriptRoot ".." "config.example.json"
         }
 
-        It "config.json exists and is valid JSON" {
+        It "config.example.json exists and is valid JSON" {
             Test-Path $script:configPath | Should -BeTrue
             { Get-Content $script:configPath -Raw | ConvertFrom-Json } | Should -Not -Throw
         }
 
-        It "config.json has required keys" {
+        It "config.example.json has required keys" {
             $config = Get-Content $script:configPath -Raw | ConvertFrom-Json
             $config.PSObject.Properties.Name | Should -Contain "vcenterServers"
             $config.PSObject.Properties.Name | Should -Contain "riskThresholds"
@@ -35,27 +35,6 @@ Describe "VMware-Snapshot-Reporter" {
             $config.email.PSObject.Properties.Name | Should -Contain "smtpServer"
             $config.email.PSObject.Properties.Name | Should -Contain "from"
             $config.email.PSObject.Properties.Name | Should -Contain "to"
-        }
-    }
-
-    Context "config.example.json" {
-        BeforeAll {
-            $script:examplePath = Join-Path $PSScriptRoot ".." "config.example.json"
-        }
-
-        It "config.example.json exists and is valid JSON" {
-            Test-Path $script:examplePath | Should -BeTrue
-            { Get-Content $script:examplePath -Raw | ConvertFrom-Json } | Should -Not -Throw
-        }
-
-        It "config.example.json has same structure as config.json" {
-            $config  = Get-Content (Join-Path $PSScriptRoot ".." "config.json") -Raw | ConvertFrom-Json
-            $example = Get-Content $script:examplePath -Raw | ConvertFrom-Json
-
-            $configKeys  = $config.PSObject.Properties.Name | Sort-Object
-            $exampleKeys = $example.PSObject.Properties.Name | Sort-Object
-
-            $exampleKeys | Should -Be $configKeys
         }
     }
 

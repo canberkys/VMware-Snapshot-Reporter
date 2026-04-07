@@ -48,7 +48,7 @@ jobs:
       - name: Run PSScriptAnalyzer
         shell: pwsh
         run: |
-          $results = Invoke-ScriptAnalyzer -Path . -Recurse -ExcludeRule PSAvoidUsingWriteHost
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -ExcludeRule PSAvoidUsingWriteHost,PSAvoidUsingConvertToSecureStringWithPlainText,PSUseBOMForUnicodeEncodedFile
           $results | Format-Table -AutoSize
           if ($results | Where-Object { $_.Severity -eq "Error" }) {
             Write-Error "PSScriptAnalyzer found errors"

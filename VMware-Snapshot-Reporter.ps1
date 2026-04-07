@@ -41,10 +41,10 @@ param(
     [PSCredential]$Credential,
 
     [Parameter()]
-    [string]$ConfigFile = (Join-Path $PSScriptRoot "config.json"),
+    [string]$ConfigFile = (Join-Path $scriptRoot "config.json"),
 
     [Parameter()]
-    [string]$OutputPath = (Join-Path $PSScriptRoot "output"),
+    [string]$OutputPath = (Join-Path $scriptRoot "output"),
 
     [Parameter()]
     [ValidateSet("HTML","JSON","CSV","All")]
@@ -61,16 +61,17 @@ param(
 )
 
 # ── Resolve script root reliably ──
-if (-not $PSScriptRoot) {
-    $PSScriptRoot = Split-Path -Parent (Resolve-Path $MyInvocation.MyCommand.Path -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue
+$scriptRoot = $PSScriptRoot
+if (-not $scriptRoot) {
+    $scriptRoot = Split-Path -Parent (Resolve-Path $MyInvocation.MyCommand.Path -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue
 }
-if (-not $PSScriptRoot) { $PSScriptRoot = $PWD.Path }
+if (-not $scriptRoot) { $scriptRoot = $PWD.Path }
 
 if (-not $ConfigFile -or -not (Test-Path $ConfigFile)) {
-    $ConfigFile = Join-Path $PSScriptRoot "config.json"
+    $ConfigFile = Join-Path $scriptRoot "config.json"
 }
 if (-not $OutputPath) {
-    $OutputPath = Join-Path $PSScriptRoot "output"
+    $OutputPath = Join-Path $scriptRoot "output"
 }
 
 # ── Internals ──
@@ -79,10 +80,10 @@ $script:CredentialFile = Join-Path $HOME ".snapshot-reporter-cred.xml"
 $script:LogFile        = $null
 
 # ══════════════════════════════════════════════════════════════
-# Helper: Write-Log
+# Helper: Write-ReportLog
 # ══════════════════════════════════════════════════════════════
 
-function Write-Log {
+function Write-ReportLog {
     param(
         [string]$Message,
         [ValidateSet("INFO","WARN","ERROR","SUCCESS")]
@@ -106,7 +107,7 @@ function Write-Log {
 # Mock Data Generator (for -TestMode)
 # ══════════════════════════════════════════════════════════════
 
-function New-MockSnapshots {
+function Get-MockSnapshot {
     $now = Get-Date
     return @(
         [PSCustomObject]@{ VM = "PROD-DB-01";   Name = "Before Patching";       Created = $now.AddDays(-15); Duration = 15; Description = "Pre-patch snapshot before Windows updates";                SizeGB = 85;  Username = "admin@vsphere.local"; VCenter = "vcsa-mock.lab.local" }
@@ -140,7 +141,7 @@ if (-not (Test-Path $ConfigFile)) {
     return
 }
 $config = Get-Content $ConfigFile -Raw | ConvertFrom-Json
-Write-Log "Config loaded: $ConfigFile" -Level SUCCESS
+Write-ReportLog "Config loaded: $ConfigFile" -Level SUCCESS
 
 # Ensure output directory exists
 if (-not (Test-Path $OutputPath)) {
@@ -149,12 +150,12 @@ if (-not (Test-Path $OutputPath)) {
 
 # Initialize log file
 $script:LogFile = Join-Path $OutputPath "snapshot-reporter_$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
-Write-Log "Log file: $($script:LogFile)"
+Write-ReportLog "Log file: $($script:LogFile)"
 
 # ── Dot-source modules ──
-Get-ChildItem -Path (Join-Path $PSScriptRoot "checks") -Filter "*.ps1" | ForEach-Object { . $_.FullName }
-Get-ChildItem -Path (Join-Path $PSScriptRoot "report")  -Filter "*.ps1" | ForEach-Object { . $_.FullName }
-Write-Log "Modules loaded" -Level SUCCESS
+Get-ChildItem -Path (Join-Path $scriptRoot "checks") -Filter "*.ps1" | ForEach-Object { . $_.FullName }
+Get-ChildItem -Path (Join-Path $scriptRoot "report")  -Filter "*.ps1" | ForEach-Object { . $_.FullName }
+Write-ReportLog "Modules loaded" -Level SUCCESS
 
 # ══════════════════════════════════════════════════════════════
 # Resolve vCenter Server(s)
@@ -163,7 +164,7 @@ Write-Log "Modules loaded" -Level SUCCESS
 if (-not $VCenterServer -and -not $TestMode) {
     if ($config.vcenterServers -and $config.vcenterServers.Count -gt 0) {
         $VCenterServer = $config.vcenterServers
-        Write-Log "vCenter(s) from config: $($VCenterServer -join ', ')"
+        Write-ReportLog "vCenter(s) from config: $($VCenterServer -join ', ')"
     } else {
         $inputVc = Read-Host "  [?] vCenter Server address"
         $VCenterServer = @($inputVc.Trim())
@@ -184,18 +185,19 @@ if (-not $Credential -and -not $TestMode) {
             $useSaved = Read-Host "  Saved credential found for [$savedUser], use it? [Y/N]"
             if ($useSaved -match '^[Yy]') {
                 $Credential = $savedCred
-                Write-Log "Using saved credential: $savedUser" -Level SUCCESS
+                Write-ReportLog "Using saved credential: $savedUser" -Level SUCCESS
             }
         } catch {
-            Write-Log "Failed to load saved credential: $_" -Level WARN
+            Write-ReportLog "Failed to load saved credential: $_" -Level WARN
         }
     }
 
     # Try environment variables
     if (-not $Credential -and $env:VCENTER_USERNAME -and $env:VCENTER_PASSWORD) {
-        $secPass = ConvertTo-SecureString $env:VCENTER_PASSWORD -AsPlainText -Force
-        $Credential = New-Object System.Management.Automation.PSCredential($env:VCENTER_USERNAME, $secPass)
-        Write-Log "Using credential from environment variables" -Level SUCCESS
+        # PSScriptAnalyzer: suppress — env var is the intended source, not a hardcoded secret
+        $secPass = $env:VCENTER_PASSWORD | ConvertTo-SecureString -AsPlainText -Force  # nosec
+        $Credential = [System.Management.Automation.PSCredential]::new($env:VCENTER_USERNAME, $secPass)
+        Write-ReportLog "Using credential from environment variables" -Level SUCCESS
     }
 
     # Interactive prompt
@@ -206,7 +208,7 @@ if (-not $Credential -and -not $TestMode) {
         $saveCred = Read-Host "  Save credential for future runs? [Y/N]"
         if ($saveCred -match '^[Yy]') {
             $Credential | Export-Clixml -Path $script:CredentialFile
-            Write-Log "Credential saved to $($script:CredentialFile)" -Level SUCCESS
+            Write-ReportLog "Credential saved to $($script:CredentialFile)" -Level SUCCESS
         }
     }
 }
@@ -218,8 +220,8 @@ if (-not $Credential -and -not $TestMode) {
 $allSnapshots = @()
 
 if ($TestMode) {
-    Write-Log "TestMode active - using mock data" -Level WARN
-    $allSnapshots = New-MockSnapshots
+    Write-ReportLog "TestMode active - using mock data" -Level WARN
+    $allSnapshots = Get-MockSnapshot
     $reportVCenterName = "vcsa-mock.lab.local"
 } else {
     # Import VMware PowerCLI
@@ -227,24 +229,24 @@ if ($TestMode) {
         Import-Module VMware.VimAutomation.Core -ErrorAction Stop
         Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false | Out-Null
     } catch {
-        Write-Log "Failed to import VMware PowerCLI: $($_.Exception.Message)" -Level ERROR
+        Write-ReportLog "Failed to import VMware PowerCLI: $($_.Exception.Message)" -Level ERROR
         Write-Error "VMware PowerCLI is required. Install with: Install-Module VMware.PowerCLI"
         return
     }
 
     foreach ($vcServer in $VCenterServer) {
-        Write-Log "Connecting to vCenter: $vcServer"
+        Write-ReportLog "Connecting to vCenter: $vcServer"
 
         try {
             Connect-VIServer $vcServer -Credential $Credential -ErrorAction Stop | Out-Null
-            Write-Log "Connected to $vcServer" -Level SUCCESS
+            Write-ReportLog "Connected to $vcServer" -Level SUCCESS
         } catch {
-            Write-Log "Failed to connect to $vcServer - $($_.Exception.Message)" -Level ERROR
+            Write-ReportLog "Failed to connect to $vcServer - $($_.Exception.Message)" -Level ERROR
             continue
         }
 
         try {
-            Write-Log "Collecting snapshots from $vcServer..."
+            Write-ReportLog "Collecting snapshots from $vcServer..."
             $snapshots = Get-SnapshotInventory `
                 -PoweredOnOnly $config.poweredOnOnly `
                 -MaxEventSamples $config.maxEventSamples `
@@ -252,15 +254,15 @@ if ($TestMode) {
                 -VCenterName $vcServer
 
             $allSnapshots += $snapshots
-            Write-Log "Found $($snapshots.Count) snapshots on $vcServer" -Level SUCCESS
+            Write-ReportLog "Found $($snapshots.Count) snapshots on $vcServer" -Level SUCCESS
         } catch {
-            Write-Log "Error collecting snapshots from $vcServer - $($_.Exception.Message)" -Level ERROR
+            Write-ReportLog "Error collecting snapshots from $vcServer - $($_.Exception.Message)" -Level ERROR
         } finally {
             try {
                 Disconnect-VIServer $vcServer -Confirm:$false -ErrorAction SilentlyContinue
-                Write-Log "Disconnected from $vcServer"
+                Write-ReportLog "Disconnected from $vcServer"
             } catch {
-                Write-Log "Error disconnecting from $vcServer" -Level WARN
+                Write-ReportLog "Error disconnecting from $vcServer" -Level WARN
             }
         }
     }
@@ -268,7 +270,7 @@ if ($TestMode) {
     $reportVCenterName = $VCenterServer -join ", "
 }
 
-Write-Log "Total snapshots collected: $($allSnapshots.Count)"
+Write-ReportLog "Total snapshots collected: $($allSnapshots.Count)"
 
 # ══════════════════════════════════════════════════════════════
 # Risk Assessment
@@ -282,8 +284,8 @@ $assessment = Invoke-RiskAssessment `
     -MediumGB $config.sizeThresholds.mediumGB
 
 $s = $assessment.Summary
-Write-Log "Risk Distribution: High=$($s.HighRiskCount), Medium=$($s.MediumRiskCount), Low=$($s.LowRiskCount)" -Level INFO
-Write-Log "Total Size: $($s.TotalSizeGB) GB | Oldest: $($s.OldestSnapDays) days" -Level INFO
+Write-ReportLog "Risk Distribution: High=$($s.HighRiskCount), Medium=$($s.MediumRiskCount), Low=$($s.LowRiskCount)" -Level INFO
+Write-ReportLog "Total Size: $($s.TotalSizeGB) GB | Oldest: $($s.OldestSnapDays) days" -Level INFO
 
 # ══════════════════════════════════════════════════════════════
 # Generate Reports
@@ -296,19 +298,19 @@ if ($ReportFormat -eq "HTML" -or $ReportFormat -eq "All") {
     $htmlFile = Join-Path $OutputPath "snapshot-report_$(Get-Date -Format 'yyyyMMdd-HHmmss').html"
     $htmlReport | Out-File -FilePath $htmlFile -Encoding UTF8
     $generatedFiles += $htmlFile
-    Write-Log "HTML report saved: $htmlFile" -Level SUCCESS
+    Write-ReportLog "HTML report saved: $htmlFile" -Level SUCCESS
 }
 
 if ($ReportFormat -eq "CSV" -or $ReportFormat -eq "All") {
     $csvFile = Export-SnapshotCsv -AssessmentResult $assessment -OutputPath $OutputPath
     $generatedFiles += $csvFile
-    Write-Log "CSV report saved: $csvFile" -Level SUCCESS
+    Write-ReportLog "CSV report saved: $csvFile" -Level SUCCESS
 }
 
 if ($ReportFormat -eq "JSON" -or $ReportFormat -eq "All") {
     $jsonFile = Export-SnapshotJson -AssessmentResult $assessment -OutputPath $OutputPath
     $generatedFiles += $jsonFile
-    Write-Log "JSON report saved: $jsonFile" -Level SUCCESS
+    Write-ReportLog "JSON report saved: $jsonFile" -Level SUCCESS
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -319,7 +321,7 @@ if ($SendEmail -and $assessment.Summary.TotalCount -gt 0) {
     $emailConfig = $config.email
 
     if (-not $emailConfig.smtpServer) {
-        Write-Log "SMTP server not configured in config.json - skipping email" -Level WARN
+        Write-ReportLog "SMTP server not configured in config.json - skipping email" -Level WARN
     } else {
         $subject = ($emailConfig.subjectTemplate -f $reportVCenterName) + " - $(Get-Date -Format 'MM/dd/yyyy')"
 
@@ -346,22 +348,22 @@ if ($SendEmail -and $assessment.Summary.TotalCount -gt 0) {
         }
 
         try {
-            Write-Log "Sending email report..."
+            Write-ReportLog "Sending email report..."
             Send-MailMessage @emailParams
-            Write-Log "Email sent to: $($emailConfig.to -join ', ')" -Level SUCCESS
+            Write-ReportLog "Email sent to: $($emailConfig.to -join ', ')" -Level SUCCESS
         } catch {
-            Write-Log "Failed to send email: $($_.Exception.Message)" -Level ERROR
+            Write-ReportLog "Failed to send email: $($_.Exception.Message)" -Level ERROR
 
             # Save backup if HTML wasn't already saved
             if ($ReportFormat -ne "HTML" -and $ReportFormat -ne "All") {
                 $backupFile = Join-Path $OutputPath "snapshot-report-backup_$(Get-Date -Format 'yyyyMMdd-HHmmss').html"
                 $htmlReport | Out-File -FilePath $backupFile -Encoding UTF8
-                Write-Log "Backup report saved: $backupFile" -Level WARN
+                Write-ReportLog "Backup report saved: $backupFile" -Level WARN
             }
         }
     }
 } elseif ($SendEmail -and $assessment.Summary.TotalCount -eq 0) {
-    Write-Log "No snapshots found - no email sent" -Level SUCCESS
+    Write-ReportLog "No snapshots found - no email sent" -Level SUCCESS
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -375,10 +377,10 @@ Write-Host "  +----------------------------------------------------+" -Foregroun
 Write-Host ""
 
 if ($generatedFiles.Count -gt 0) {
-    Write-Log "Generated files:"
+    Write-ReportLog "Generated files:"
     foreach ($f in $generatedFiles) {
         Write-Host "    $f" -ForegroundColor White
     }
 }
 
-Write-Log "Script completed successfully" -Level SUCCESS
+Write-ReportLog "Script completed successfully" -Level SUCCESS

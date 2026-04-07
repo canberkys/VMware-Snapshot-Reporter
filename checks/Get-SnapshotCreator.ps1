@@ -19,12 +19,12 @@ function Get-SnapshotCreator {
     )
 
     try {
-        $event = Get-VIEvent -Entity $VMName -MaxSamples $MaxSamples |
+        $snapEvent = Get-VIEvent -Entity $VMName -MaxSamples $MaxSamples |
             Where-Object { $_.FullFormattedMessage -like "*Task: Create virtual machine snapshot*" } |
             Select-Object -First 1
 
-        if ($event -and $event.UserName) {
-            return $event.UserName
+        if ($snapEvent -and $snapEvent.UserName) {
+            return $snapEvent.UserName
         }
     }
     catch {
